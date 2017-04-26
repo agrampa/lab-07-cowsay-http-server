@@ -1,0 +1,49 @@
+'use strict';
+
+const bodyParser = require('./body-parser.js');
+const http = require('http'); //instead of net module
+const url = require('url');
+const querystring = require('querystring');
+const cowsay = require('cowsay');
+const PORT = process.env.PORT || 3000;
+
+const server = module.exports = http.createServer(function(req, res) { 
+  req.url = url.parse(req.url); 
+  req.url.query = querystring.parse(req.url.query);
+  console.log(req.url); //returns empty object
+  
+  if(req.method === 'POST') {
+    if(req.url.pathname === '/cowsay') {
+      bodyParser(req, function(err) {
+        if(err) console.error(err);
+        let message = cowsay.say({text: req.body.text});
+        res.writeHead(200, {'Content-Type': 'text/plain'});
+        res.write(message);
+        req.end();
+      });
+    } else {
+      let message = cowsay.say({text: 'Bad request!\nTry localhost:3000/cowsay'});
+      res.writeHead(400, {'Content-Type': 'text/plain'});
+      res.write(message);
+    }
+  }
+  
+  if(req.method === 'GET') {
+    if(req.url.pathname === '/cowsay') {
+      
+      
+      let message = cowsay.say({text: <querystring text>})
+      res.writeHead(200, {'Content-Type': 'text/plain'});
+      res.write(message);
+      res.end();
+    } else {
+      let message = cowsay.say({text: 'Bad request!\nTry localhost:3000/cowsay'});
+      res.writeHead(400, {'Content-Type': 'text/plain'});
+      res.write(message);
+    }
+  }
+  
+  res.end();
+});
+
+server.listen(PORT, () => console.log(`Listening on PORT:, ${PORT}`));
